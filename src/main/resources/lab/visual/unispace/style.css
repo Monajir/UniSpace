@@ -1,0 +1,479 @@
+/*!* App Root: soft blue/purple dashboard gradient, modern sans font *!*/
+/*.root {*/
+/*    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #f5f7fa, #c3cfe2);*/
+/*    -fx-font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;*/
+/*    -fx-font-size: 15px;*/
+/*}*/
+
+/*.top-bar {*/
+/*    -fx-background-color: rgba(245, 247, 250, 0.65);*/
+/*    -fx-padding: 0 0 16 0;*/
+/*    -fx-effect: dropshadow(gaussian, #c3cfe2, 8, 0.09, 0, 2);*/
+/*}*/
+
+/*!* Polished Card & Glass Cards *!*/
+/*.modern-card, .glass-card {*/
+/*    -fx-background-radius: 26;*/
+/*    -fx-border-radius: 26;*/
+/*    -fx-padding: 32 36 32 36;*/
+/*    -fx-effect: dropshadow(gaussian, #b2bccc, 20, 0.14, 0, 4);*/
+/*}*/
+
+/*.modern-card {*/
+/*    -fx-background-color: #fcfcfe;*/
+/*    -fx-border-color: #e4e8ec;*/
+/*    -fx-border-width: 1;*/
+/*}*/
+
+/*.glass-card {*/
+/*    -fx-background-color: rgba(255,255,255,0.97);*/
+/*    -fx-border-color: #e6e9f4ea;*/
+/*    -fx-border-width: 1.2;*/
+/*    !* JavaFX does not support -fx-backdrop-filter, but we fake it with near-white + drop shadow *!*/
+/*}*/
+
+/*!* Primary/Accent Button (dashboard blue/purple) *!*/
+/*.primary-button {*/
+/*    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #667eea, #764ba2 85%);*/
+/*    -fx-text-fill: white;*/
+/*    -fx-font-weight: 700;*/
+/*    -fx-font-size: 16px;*/
+/*    -fx-background-radius: 18;*/
+/*    -fx-border-radius: 18;*/
+/*    -fx-cursor: hand;*/
+/*    -fx-padding: 14 32;*/
+/*    -fx-effect: dropshadow(gaussian, #b1aff1, 8, 0.21, 0, 2);*/
+/*    -fx-border-color: #e8eaf6;*/
+/*    -fx-border-width: 1;*/
+/*}*/
+
+/*.primary-button:hover, .primary-button:focused {*/
+/*    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #5a6fd8, #6a4190 100%);*/
+/*    -fx-effect: dropshadow(gaussian, #746fb8, 14, 0.27, 0, 1);*/
+/*}*/
+
+/*.secondary-button {*/
+/*    -fx-background-color: transparent;*/
+/*    -fx-text-fill: #5D5FEF;*/
+/*    -fx-border-color: #7678ED;*/
+/*    -fx-border-width: 2;*/
+/*    -fx-border-radius: 16;*/
+/*    -fx-background-radius: 16;*/
+/*    -fx-font-weight: 600;*/
+/*    -fx-font-size: 15px;*/
+/*    -fx-padding: 10 20;*/
+/*    -fx-cursor: hand;*/
+/*}*/
+
+/*.secondary-button:hover {*/
+/*    -fx-background-color: #eaecfd88;*/
+/*    -fx-text-fill: #764ba2;*/
+/*}*/
+
+/*!* Icon button (used for round icons) *!*/
+/*.icon-button {*/
+/*    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #ffecd2, #fcb69f);*/
+/*    -fx-background-radius: 50;*/
+/*    -fx-border-radius: 50;*/
+/*    -fx-padding: 6 10;*/
+/*    -fx-cursor: hand;*/
+/*    -fx-effect: dropshadow(gaussian, #e7cfc1, 7, 0.22, 0, 2);*/
+/*}*/
+
+
+/*!********* FIELDS *********!*/
+
+/*.modern-text-field, .modern-password-field {*/
+/*    -fx-background-color: #f8fafc;*/
+/*    -fx-background-radius: 14;*/
+/*    -fx-border-radius: 14;*/
+/*    -fx-border-color: #e2e8f0;*/
+/*    -fx-border-width: 1.5;*/
+/*    -fx-padding: 14 18;*/
+/*    -fx-font-size: 15px;*/
+/*    -fx-text-fill: #313854;*/
+/*    -fx-effect: dropshadow(gaussian, #dde4ec, 7, 0.09, 0, 1);*/
+/*}*/
+/*.modern-text-field:focused, .modern-password-field:focused {*/
+/*    -fx-background-color: #ffffff;*/
+/*    -fx-border-color: #667eea;*/
+/*    -fx-effect: dropshadow(gaussian, #829be1, 12, 0.19, 0, 0);*/
+/*}*/
+
+/*!********* LIST VIEW (For home/classroom cards) *********!*/
+
+/*.modern-list-view {*/
+/*    -fx-background-color: transparent;*/
+/*    -fx-border-color: transparent;*/
+/*    -fx-padding: 0;*/
+/*}*/
+
+/*.modern-list-view .list-cell {*/
+/*    -fx-background-color: #ffffff;*/
+/*    -fx-background-radius: 18;*/
+/*    -fx-padding: 16 20 16 20;*/
+/*    !*-fx-border-color: #e2e8f0;*!*/
+/*    -fx-border-width: 0; !** Changed here to add seamlessness to the design**!*/
+/*    -fx-effect: dropshadow(gaussian, #c3cfe2, 6, 0.10, 0, 2);*/
+/*    -fx-background-insets: 0, 0 0 8 0;*/
+/*    -fx-font-size: 15px;*/
+/*    -fx-text-fill: #2d3748;*/
+/*    -fx-transition: all 0.2s;*/
+/*}*/
+
+/*.modern-list-view .list-cell:hover {*/
+/*    -fx-background-color: #f7fafc;*/
+/*    -fx-effect: dropshadow(gaussian, #667eea33, 14, 0.2, 0, 4);*/
+/*}*/
+
+/*.modern-list-view .list-cell:selected {*/
+/*    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #667eea, #764ba2);*/
+/*    -fx-text-fill: white;*/
+/*}*/
+
+
+/*!********* STATUS BADGES *********!*/
+
+/*.status-available {*/
+/*    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #84fab0, #8fd3f4);*/
+/*    -fx-background-radius: 10;*/
+/*    -fx-padding: 5 14;*/
+/*    -fx-text-fill: #15696d;*/
+/*    -fx-font-weight: 600;*/
+/*    -fx-font-size: 13px;*/
+/*}*/
+/*.status-booked {*/
+/*    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #fa709a, #fee140);*/
+/*    -fx-background-radius: 10;*/
+/*    -fx-padding: 5 14;*/
+/*    -fx-text-fill: #7d244a;*/
+/*    -fx-font-weight: 600;*/
+/*    -fx-font-size: 13px;*/
+/*}*/
+/*.status-pending {*/
+/*    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #a8edea, #fed6e3);*/
+/*    -fx-background-radius: 10;*/
+/*    -fx-padding: 5 14;*/
+/*    -fx-text-fill: #355567;*/
+/*    -fx-font-weight: 600;*/
+/*    -fx-font-size: 13px;*/
+/*}*/
+
+
+/*!********* TYPOGRAPHY *********!*/
+
+/*.title-large {*/
+/*    -fx-font-size: 34px;*/
+/*    -fx-font-weight: 800;*/
+/*    -fx-text-fill: #1a202c;*/
+/*    -fx-effect: dropshadow(gaussian, #b0bee4cc, 6, 0.15, 0, 2);*/
+/*}*/
+/*.title-medium {*/
+/*    -fx-font-size: 22px;*/
+/*    -fx-font-weight: 700;*/
+/*    -fx-text-fill: #2d3748;*/
+/*}*/
+/*.subtitle {*/
+/*    -fx-font-size: 16px;*/
+/*    -fx-font-weight: 500;*/
+/*    -fx-text-fill: #4a5568;*/
+/*    -fx-opacity: 0.88;*/
+/*}*/
+/*.body-text {*/
+/*    -fx-font-size: 15px;*/
+/*    -fx-text-fill: #5f6477;*/
+/*    -fx-opacity: 0.80;*/
+/*}*/
+/*.error-label {*/
+/*    -fx-text-fill: #e53e3e;*/
+/*    -fx-font-size: 14px;*/
+/*    -fx-font-weight: 600;*/
+/*}*/
+/*.success-label {*/
+/*    -fx-text-fill: #38a169;*/
+/*    -fx-font-size: 14px;*/
+/*    -fx-font-weight: 600;*/
+/*}*/
+
+/*!********* CALENDAR GRID *********!*/
+
+/*.calendar-header {*/
+/*    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #667eea, #764ba2);*/
+/*    -fx-background-radius: 10;*/
+/*    -fx-text-fill: white;*/
+/*    -fx-font-weight: 600;*/
+/*    -fx-font-size: 15px;*/
+/*    -fx-alignment: center;*/
+/*    -fx-padding: 12;*/
+/*}*/
+/*.calendar-cell {*/
+/*    -fx-background-color: #ffffff;*/
+/*    -fx-background-radius: 9;*/
+/*    -fx-padding: 12;*/
+/*    -fx-border-color: #e2e8f0;*/
+/*    -fx-border-width: 1;*/
+/*    -fx-border-radius: 9;*/
+/*    -fx-cursor: hand;*/
+/*    -fx-alignment: center;*/
+/*    -fx-font-size: 15px;*/
+/*}*/
+/*.calendar-cell:hover {*/
+/*    -fx-background-color: #f7fafc;*/
+/*    -fx-effect: dropshadow(gaussian, #667eea44, 12, 0.13, 0, 2);*/
+/*}*/
+
+
+/*!* Responsive layout helpers (fields/buttons to fill cards if desired) *!*/
+/*VBox > .modern-text-field,*/
+/*VBox > .primary-button,*/
+/*VBox > .secondary-button {*/
+/*    -fx-max-width: Infinity;*/
+/*}*/
+
+/*.scroll-pane > .viewport {*/
+/*    -fx-background-color: transparent;*/
+/*}*/
+/*.scroll-bar:vertical, .scroll-bar:horizontal {*/
+/*    -fx-background-color: #e2e8f0;*/
+/*    -fx-background-radius: 7;*/
+/*}*/
+
+/*!* Optional: divider *!*/
+/*.divider {*/
+/*    -fx-background-color: #d7dde8;*/
+/*    -fx-pref-height: 2;*/
+/*    -fx-background-radius: 2;*/
+/*    -fx-opacity: .5;*/
+/*}*/
+
+/* --- Root Background: Neutral & Professional --- */
+.root {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #f5f7fa, #e4eaf0 90%);
+    -fx-font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+    -fx-font-size: 15px;
+}
+
+/* --- Polished Top Bar --- */
+.top-bar {
+    -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-effect: dropshadow(gaussian, #b8bdd6, 6, 0.12, 0, 1);
+    -fx-padding: 0 0 16 0;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: transparent transparent #e4e8ec transparent;
+}
+
+/* --- Card & Glass Card: Crisp and Shadowed --- */
+.modern-card, .glass-card {
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-padding: 36 40 36 40;
+    -fx-effect: dropshadow(gaussian, #d5dcef, 18, 0.09, 0, 7);
+}
+.modern-card {
+    -fx-background-color: #fff;
+    -fx-border-color: #ebeaf6;
+    -fx-border-width: 1;
+}
+.glass-card {
+    -fx-background-color: rgba(249,250,251,0.92);
+    -fx-border-color: #ebeaf6f0;
+    -fx-border-width: 1.2;
+}
+
+/* --- Brand Accent Button (Deep & Lively Blue) --- */
+.primary-button {
+    -fx-background-color: linear-gradient(from 0% 50% to 100% 100%, #1d4ed8, #6366f1 80%);
+    -fx-text-fill: #fff;
+    -fx-font-weight: 700;
+    -fx-font-size: 16px;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-cursor: hand;
+    -fx-padding: 13 30;
+    -fx-border-color: #4f46e5;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, #3b82f6, 8, 0.30, 0, 3);
+    -fx-transition: background-color 0.18s;
+}
+.primary-button:hover, .primary-button:focused {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #2563eb, #4f46e5 100%);
+    -fx-effect: dropshadow(gaussian, #6366f1, 13, 0.18, 0, 5);
+}
+
+/* --- Secondary Button (Subtle, Accessible Blue) --- */
+.secondary-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #475569;
+    -fx-border-color: #c3c8df;
+    -fx-border-width: 2;
+    -fx-border-radius: 13;
+    -fx-background-radius: 13;
+    -fx-font-weight: 600;
+    -fx-font-size: 15px;
+    -fx-padding: 10 24;
+    -fx-cursor: hand;
+}
+.secondary-button:hover {
+    -fx-background-color: #eef2fb;
+    -fx-text-fill: #3b82f6;
+    -fx-border-color: #4f46e5;
+}
+
+/* --- Icon/Minimal Button --- */
+.icon-button {
+    -fx-background-color: linear-gradient(from 0% 50% to 100% 100%, #f4f7fa, #e7ebfa 80%);
+    -fx-background-radius: 50;
+    -fx-border-radius: 50;
+    -fx-padding: 7 12;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #dbeafe, 7, 0.12, 0, 1);
+}
+
+/* --- Form Field (Neutral, Modern) --- */
+.modern-text-field, .modern-password-field {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 13;
+    -fx-border-radius: 13;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1.2;
+    -fx-padding: 14 16;
+    -fx-font-size: 15px;
+    -fx-text-fill: #22223b;
+    -fx-effect: dropshadow(gaussian, #e3e9f4, 5, 0.08, 0, 1);
+}
+.modern-text-field:focused, .modern-password-field:focused {
+    -fx-background-color: #fff;
+    -fx-border-color: #6366f1;
+    -fx-effect: dropshadow(gaussian, #6366f1, 9, 0.20, 0, 1);
+}
+
+/* --- ListView: Card Stacks --- */
+.modern-list-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.modern-list-view .list-cell {
+    -fx-background-color: #fff;
+    -fx-background-radius: 14;
+    -fx-padding: 14 22 14 22;
+    -fx-border-width: 0;
+    -fx-effect: dropshadow(gaussian, #dbeafe, 7, 0.10, 0, 3);
+    -fx-font-size: 15px;
+    -fx-text-fill: #22223b;
+}
+.modern-list-view .list-cell:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-effect: dropshadow(gaussian, #6366f188, 10, 0.13, 0, 4);
+}
+.modern-list-view .list-cell:selected {
+    -fx-background-color: linear-gradient(from 0% 30% to 100% 100%, #6366f1, #1e293b 100%);
+    -fx-text-fill: #fff;
+}
+
+/* --- Status Badges: Crisp Chips --- */
+.status-available {
+    -fx-background-color: linear-gradient(from 0% 50% to 100% 100%, #34d399, #60a5fa 90%);
+    -fx-background-radius: 9;
+    -fx-padding: 5 14;
+    -fx-text-fill: #154c38;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+.status-booked {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #fa709a, #fee140);
+    -fx-background-radius: 9;
+    -fx-padding: 5 14;
+    -fx-text-fill: #7d244a;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.status-pending {
+    -fx-background-color: linear-gradient(from 0% 80% to 100% 100%, #c7d2fe, #fbcfe8 100%);
+    -fx-background-radius: 9;
+    -fx-padding: 5 14;
+    -fx-text-fill: #334155;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+/* --- Typography --- */
+.title-large {
+    -fx-font-size: 34px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #22223b;
+    -fx-effect: dropshadow(gaussian, #afaff6, 5, 0.12, 0, 1);
+}
+.title-medium {
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2d3748;
+}
+.subtitle {
+    -fx-font-size: 16px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #525f7f;
+    -fx-opacity: 0.92;
+}
+.body-text {
+    -fx-font-size: 15px;
+    -fx-text-fill: #64748b;
+    -fx-opacity: 0.83;
+}
+.error-label {
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+.success-label {
+    -fx-text-fill: #059669;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+/* --- Calendar grid --- */
+.calendar-header {
+    -fx-background-color: linear-gradient(from 0% 40% to 100% 100%, #6366f1, #a5b4fc 100%);
+    -fx-background-radius: 9;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-alignment: center;
+    -fx-padding: 12;
+    -fx-font-size: 15px;
+}
+.calendar-cell {
+    -fx-background-color: #fff;
+    -fx-background-radius: 7;
+    -fx-padding: 12;
+    -fx-border-color: #e7eaf3;
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+    -fx-font-size: 15px;
+}
+.calendar-cell:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-effect: dropshadow(gaussian, #6366f188, 9, 0.11, 0, 2);
+}
+
+/* --- Miscellaneous Helpers --- */
+VBox > .modern-text-field,
+VBox > .primary-button,
+VBox > .secondary-button {
+    -fx-max-width: Infinity;
+}
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+.scroll-bar:vertical, .scroll-bar:horizontal {
+    -fx-background-color: #e0e7ef;
+    -fx-background-radius: 6;
+}
+.divider {
+    -fx-background-color: #e4e8ec;
+    -fx-pref-height: 2;
+    -fx-background-radius: 2;
+    -fx-opacity: .6;
+}
