@@ -17,19 +17,22 @@
                 <Insets bottom="12" left="8" right="8" top="24" />
             </HBox.margin>
             <children>
-                <Label styleClass="title-large" text="UniSpace" />
+                <VBox spacing="4.0">
+                    <Label styleClass="title-large" text="UniSpace" />
+                    <Label styleClass="subtitle" text="Your smart campus assistant" />
+                </VBox>
                 <Region HBox.hgrow="ALWAYS" />
                 <VBox alignment="CENTER_RIGHT" spacing="8.0">
-                    <!--                        <Label styleClass="subtitle" text="Welcome back!" />-->
+                    <!-- <Label styleClass="subtitle" text="Welcome back!" /> -->
                     <Button onAction="#onLoginButton" styleClass="primary-button" text="Login"/>
                 </VBox>
             </children>
             <padding>
                 <Insets bottom="20.0" left="32.0" right="32.0" top="20.0" />
             </padding>
-         <BorderPane.margin>
-            <Insets left="5.0" right="5.0" top="10.0" />
-         </BorderPane.margin>
+            <BorderPane.margin>
+                <Insets left="5.0" right="5.0" top="10.0" />
+            </BorderPane.margin>
         </HBox>
     </top>
     <center>
