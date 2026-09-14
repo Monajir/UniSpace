@@ -1,0 +1,94 @@
+name: unispace
+
+x-default-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-unispace}
+      POSTGRES_USER: ${POSTGRES_USER:-unispace}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-unispace}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - database-network
+
+  backend:
+    build:
+      context: ./Backend/UniSpace
+    environment:
+      SERVER_PORT: 8082
+      DATABASE_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-unispace}
+      DATABASE_USERNAME: ${POSTGRES_USER:-unispace}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-unispace}
+      JWT_SECRET: ${JWT_SECRET:-academic-demo-jwt-secret-at-least-32-bytes}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-1800000}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8080}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-demo}
+      DEMO_ADMIN_EMAIL: ${DEMO_ADMIN_EMAIL:-admin@iut-dhaka.edu}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-admin12345}
+      DEMO_ADMIN_NAME: ${DEMO_ADMIN_NAME:-Demo Administrator}
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-8082}:8082"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+    networks:
+      - application-network
+      - database-network
+
+  frontend:
+    build:
+      context: ./Frontend/classflo-booking
+      args:
+        VITE_API_BASE_URL: ""
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+    networks:
+      - application-network
+
+volumes:
+  postgres-data:
+
+networks:
+  application-network:
+  database-network:
+    internal: true
