@@ -14,14 +14,20 @@ import java.util.UUID;
 public class ClassroomService {
 
     private final ClassroomRepo classroomRepo;
+    private final ClassroomCatalogueCache catalogueCache;
 
-    public ClassroomService(ClassroomRepo classroomRepo) {
+    public ClassroomService(ClassroomRepo classroomRepo, ClassroomCatalogueCache catalogueCache) {
         this.classroomRepo = classroomRepo;
+        this.catalogueCache = catalogueCache;
     }
 
     @Transactional(readOnly = true)
     public List<Classroom> getAllAvailableClassrooms() {
-        return classroomRepo.findAllByIsAvailable(true);
+        return catalogueCache.get().orElseGet(() -> {
+            List<Classroom> classrooms = classroomRepo.findAllByIsAvailable(true);
+            catalogueCache.put(classrooms);
+            return classrooms;
+        });
     }
 
     @Transactional(readOnly = true)
@@ -47,4 +53,3 @@ public class ClassroomService {
         return classroom;
     }
 }
-

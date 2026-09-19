@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@EntityListeners(com.techManiacs.UniSpace.config.ClassroomCacheListener.class)
 @Table(name = "classrooms")
 public class Classroom {
     @Id

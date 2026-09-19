@@ -18,7 +18,7 @@ export function useClassrooms() {
   useEffect(() => {
     async function fetchClassrooms() {
       try {
-        const response = await fetch(apiUrl('/api/classrooms?available=true'));
+        const response = await fetch(apiUrl('/api/classrooms'));
         
         if (response.ok) {
           const data = await response.json();

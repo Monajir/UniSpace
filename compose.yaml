@@ -7,6 +7,19 @@ x-default-logging: &default-logging
     max-file: "3"
 
 services:
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - database-network
+
   database:
     image: postgres:17-alpine
     environment:
@@ -31,6 +44,10 @@ services:
       context: ./Backend/UniSpace
     environment:
       SERVER_PORT: 8082
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CLASSROOM_CACHE_ENABLED: ${CLASSROOM_CACHE_ENABLED:-true}
+      CLASSROOM_CACHE_TTL: ${CLASSROOM_CACHE_TTL:-60s}
       DATABASE_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-unispace}
       DATABASE_USERNAME: ${POSTGRES_USER:-unispace}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-unispace}

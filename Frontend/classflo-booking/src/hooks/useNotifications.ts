@@ -93,7 +93,7 @@ export function useNotifications(enabled = true) {
   const markRead = (id: string) => updateReadState(`/api/notifications/${id}/read`, [id]);
   const markAllRead = () =>
     updateReadState(
-      "/api/notifications/read-all",
+      "/api/notifications",
       notifications.filter((notification) => !notification.is_read).map((notification) => notification.id)
     );
 

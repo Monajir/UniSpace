@@ -1080,7 +1080,7 @@ export default function Profile() {
         await handleUnauthorized();
         return;
       }
-      const response = await fetch(apiUrl('/student/my/routine'), {
+      const response = await fetch(apiUrl('/api/me/routine'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1118,7 +1118,7 @@ export default function Profile() {
         await handleUnauthorized();
         return;
       }
-      const response = await fetch(apiUrl('/student/my/bookings'), {
+      const response = await fetch(apiUrl('/api/me/bookings'), {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1174,7 +1174,7 @@ export default function Profile() {
 
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(apiUrl(`/student/my/bookings/${cancelBookingId}`), {
+      const response = await fetch(apiUrl(`/api/me/bookings/${cancelBookingId}`), {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -1204,7 +1204,7 @@ export default function Profile() {
     try {
       setLoading((prev) => ({ ...prev, roleRequest: true }));
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(apiUrl('/student/role-request'), {
+      const response = await fetch(apiUrl('/api/role-requests'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

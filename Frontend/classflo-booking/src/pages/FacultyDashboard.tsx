@@ -119,7 +119,7 @@ export default function FacultyDashboard() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(apiUrl("/api/bookings/faculty"), {
+      const response = await fetch(apiUrl("/api/bookings/assigned-to-me"), {
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
       });
@@ -179,7 +179,7 @@ export default function FacultyDashboard() {
     try {
       setSubmittingId(booking.pending.id);
       const response = await fetch(
-        apiUrl(`/api/bookings/faculty/${booking.pending.id}/${type}`),
+        apiUrl(`/api/bookings/${booking.pending.id}/${type}`),
         {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}` },

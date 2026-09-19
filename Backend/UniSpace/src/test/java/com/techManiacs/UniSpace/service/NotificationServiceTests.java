@@ -38,7 +38,7 @@ class NotificationServiceTests {
     void notificationsAreLoadedOnlyForAuthenticatedUser() {
         User user = user();
         Notification notification = new Notification();
-        when(userService.getUerByEmail(user.getEmail())).thenReturn(user);
+        when(userService.getUserByEmail(user.getEmail())).thenReturn(user);
         when(notificationRepo.findAllByUserIdOrderByCreatedAtDesc(user.getId()))
                 .thenReturn(List.of(notification));
 
@@ -51,7 +51,7 @@ class NotificationServiceTests {
         UUID notificationId = UUID.randomUUID();
         Notification notification = new Notification();
         notification.setId(notificationId);
-        when(userService.getUerByEmail(user.getEmail())).thenReturn(user);
+        when(userService.getUserByEmail(user.getEmail())).thenReturn(user);
         when(notificationRepo.findByIdAndUserId(notificationId, user.getId()))
                 .thenReturn(Optional.of(notification));
 
@@ -65,7 +65,7 @@ class NotificationServiceTests {
     void userCannotMarkAnotherUsersNotificationRead() {
         User user = user();
         UUID notificationId = UUID.randomUUID();
-        when(userService.getUerByEmail(user.getEmail())).thenReturn(user);
+        when(userService.getUserByEmail(user.getEmail())).thenReturn(user);
         when(notificationRepo.findByIdAndUserId(notificationId, user.getId()))
                 .thenReturn(Optional.empty());
 
@@ -83,7 +83,7 @@ class NotificationServiceTests {
         faculty.setEmail(booking.getFacultyEmail());
         faculty.setRoles(List.of("FACULTY"));
         when(classroomService.getClassroomNameById(booking.getClassroomId())).thenReturn("AB-101");
-        when(userService.getUerByEmail(booking.getFacultyEmail())).thenReturn(faculty);
+        when(userService.getUserByEmail(booking.getFacultyEmail())).thenReturn(faculty);
 
         notificationService.bookingRequested(booking);
 

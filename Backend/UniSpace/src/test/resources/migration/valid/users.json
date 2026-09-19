@@ -1,1 +1,0 @@
-{"_id":{"$oid":"507f1f77bcf86cd799439011"},"name":"Migration Student","password":"$2a$10$existingPasswordHash","email":"migration.student@example.com","roles":["STUDENT"],"program":"CSE","semester":5,"section":1}

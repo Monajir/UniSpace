@@ -1,6 +1,7 @@
 package com.techManiacs.UniSpace.service;
 
 import com.techManiacs.UniSpace.domain.BookingStatus;
+import com.techManiacs.UniSpace.domain.Role;
 import com.techManiacs.UniSpace.exception.ApiException;
 import com.techManiacs.UniSpace.model.Booking;
 import com.techManiacs.UniSpace.model.Classroom;
@@ -9,6 +10,7 @@ import com.techManiacs.UniSpace.model.User;
 import com.techManiacs.UniSpace.repository.BookingRepo;
 import com.techManiacs.UniSpace.repository.RoutineRepo;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -35,6 +37,15 @@ class BookingServiceTests {
     @Mock private ClassroomService classroomService;
     @Mock private NotificationService notificationService;
     @InjectMocks private BookingService bookingService;
+
+    @BeforeEach
+    void registerFaculty() {
+        User faculty = new User();
+        faculty.setName("Dr. Registered Faculty");
+        faculty.setEmail("faculty@iut-dhaka.edu");
+        faculty.setRoles(List.of(Role.FACULTY.value()));
+        lenient().when(userService.getUserByEmail("faculty@iut-dhaka.edu")).thenReturn(faculty);
+    }
 
     @Test
     void ownerCanDeleteBooking() {
@@ -71,7 +82,7 @@ class BookingServiceTests {
         booking.setFacultyEmail(" Faculty@IUT-DHAKA.EDU ");
         User user = new User();
         user.setId(userId);
-        when(userService.getUerByEmail("student@iut-dhaka.edu")).thenReturn(user);
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(user);
         when(classroomService.lockAvailableClassroom(classroomId)).thenReturn(new Classroom());
         when(bookingRepo.save(booking)).thenReturn(booking);
 
@@ -81,7 +92,45 @@ class BookingServiceTests {
         assertThat(saved.getStatus()).isEqualTo(BookingStatus.PENDING);
         assertThat(saved.getDay()).isEqualToIgnoringCase(date.getDayOfWeek().name());
         assertThat(saved.getFacultyEmail()).isEqualTo("faculty@iut-dhaka.edu");
+        assertThat(saved.getFacultyName()).isEqualTo("Dr. Registered Faculty");
         verify(notificationService).bookingRequested(saved);
+    }
+
+    @Test
+    void unregisteredFacultyEmailIsRejectedBeforeAvailabilityChecks() {
+        Booking booking = booking(UUID.randomUUID(), LocalDate.now().plusDays(1),
+                LocalTime.of(8, 0), LocalTime.of(9, 15));
+        User requester = new User();
+        requester.setId(UUID.randomUUID());
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(requester);
+        when(userService.getUserByEmail("faculty@iut-dhaka.edu")).thenReturn(null);
+
+        assertThatThrownBy(() -> bookingService.makeBookingRequest(booking, "student@iut-dhaka.edu"))
+                .isInstanceOfSatisfying(ApiException.class, exception -> {
+                    assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(exception.getMessage()).contains("registered faculty account");
+                });
+        verify(classroomService, never()).lockAvailableClassroom(any());
+        verify(bookingRepo, never()).save(any());
+    }
+
+    @Test
+    void userWithoutFacultyRoleCannotBeAssignedARequest() {
+        Booking booking = booking(UUID.randomUUID(), LocalDate.now().plusDays(1),
+                LocalTime.of(8, 0), LocalTime.of(9, 15));
+        User requester = new User();
+        requester.setId(UUID.randomUUID());
+        User nonFaculty = new User();
+        nonFaculty.setName("Student Account");
+        nonFaculty.setRoles(List.of(Role.STUDENT.value()));
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(requester);
+        when(userService.getUserByEmail("faculty@iut-dhaka.edu")).thenReturn(nonFaculty);
+
+        assertThatThrownBy(() -> bookingService.makeBookingRequest(booking, "student@iut-dhaka.edu"))
+                .isInstanceOfSatisfying(ApiException.class,
+                        exception -> assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST));
+        verify(classroomService, never()).lockAvailableClassroom(any());
+        verify(bookingRepo, never()).save(any());
     }
 
     @Test
@@ -92,7 +141,7 @@ class BookingServiceTests {
         booking.setFacultyEmail("faculty@example.com@iut-dhaka.edu");
         User user = new User();
         user.setId(UUID.randomUUID());
-        when(userService.getUerByEmail("student@iut-dhaka.edu")).thenReturn(user);
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(user);
 
         assertThatThrownBy(() -> bookingService.makeBookingRequest(booking, "student@iut-dhaka.edu"))
                 .isInstanceOfSatisfying(ApiException.class,
@@ -107,7 +156,7 @@ class BookingServiceTests {
                 LocalTime.of(8, 0), LocalTime.of(9, 16));
         User user = new User();
         user.setId(UUID.randomUUID());
-        when(userService.getUerByEmail("student@iut-dhaka.edu")).thenReturn(user);
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(user);
 
         assertThatThrownBy(() -> bookingService.makeBookingRequest(booking, "student@iut-dhaka.edu"))
                 .isInstanceOfSatisfying(ApiException.class,
@@ -121,7 +170,7 @@ class BookingServiceTests {
                 LocalTime.of(8, 10), LocalTime.of(9, 10));
         User user = new User();
         user.setId(UUID.randomUUID());
-        when(userService.getUerByEmail("student@iut-dhaka.edu")).thenReturn(user);
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(user);
 
         assertThatThrownBy(() -> bookingService.makeBookingRequest(booking, "student@iut-dhaka.edu"))
                 .isInstanceOfSatisfying(ApiException.class, exception -> {
@@ -139,7 +188,7 @@ class BookingServiceTests {
         booking.setCourseCode("  ");
         User user = new User();
         user.setId(UUID.randomUUID());
-        when(userService.getUerByEmail("student@iut-dhaka.edu")).thenReturn(user);
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(user);
 
         assertThatThrownBy(() -> bookingService.makeBookingRequest(booking, "student@iut-dhaka.edu"))
                 .isInstanceOfSatisfying(ApiException.class, exception -> {
@@ -156,7 +205,7 @@ class BookingServiceTests {
                 LocalTime.of(8, 0), LocalTime.of(9, 0));
         User user = new User();
         user.setId(UUID.randomUUID());
-        when(userService.getUerByEmail("student@iut-dhaka.edu")).thenReturn(user);
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(user);
 
         assertThatThrownBy(() -> bookingService.makeBookingRequest(booking, "student@iut-dhaka.edu"))
                 .isInstanceOfSatisfying(ApiException.class,
@@ -174,7 +223,7 @@ class BookingServiceTests {
         routine.setDay(date.getDayOfWeek().name());
         routine.setStartTime(LocalTime.of(10, 30));
         routine.setEndTime(LocalTime.of(11, 30));
-        when(userService.getUerByEmail("student@iut-dhaka.edu")).thenReturn(user);
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(user);
         when(classroomService.lockAvailableClassroom(classroomId)).thenReturn(new Classroom());
         when(routineRepo.findAllByClassroomId(classroomId)).thenReturn(List.of(routine));
 
@@ -222,7 +271,7 @@ class BookingServiceTests {
         pending.setStatus(BookingStatus.PENDING);
         User user = new User();
         user.setId(UUID.randomUUID());
-        when(userService.getUerByEmail("student@iut-dhaka.edu")).thenReturn(user);
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(user);
         when(classroomService.lockAvailableClassroom(classroomId)).thenReturn(new Classroom());
         when(bookingRepo.findAllByClassroomIdAndBookingDateAndStatusIn(
                 classroomId, date, List.of(BookingStatus.PENDING, BookingStatus.BOOKED)))
@@ -243,7 +292,7 @@ class BookingServiceTests {
         pending.setStatus(BookingStatus.PENDING);
         User user = new User();
         user.setId(UUID.randomUUID());
-        when(userService.getUerByEmail("student@iut-dhaka.edu")).thenReturn(user);
+        when(userService.getUserByEmail("student@iut-dhaka.edu")).thenReturn(user);
         when(classroomService.lockAvailableClassroom(classroomId)).thenReturn(new Classroom());
         when(bookingRepo.findAllByClassroomIdAndBookingDateAndStatusIn(
                 classroomId, date, List.of(BookingStatus.PENDING, BookingStatus.BOOKED)))

@@ -20,7 +20,6 @@ This phase replaced transient, booking-derived messages with persistent, recipie
 - Added one reusable frontend notification feed with unread counts, timestamps, individual read actions, and a mark-all-read action.
 - Replaced the student/CR profile's generated messages with the persistent feed and added the same feed to the faculty dashboard.
 - Backfilled notifications for bookings already present when the Flyway migration runs.
-- Extended the legacy MongoDB importer to generate notification history after importing bookings.
 - Seeded 11 connected demo notifications without duplicating them on restart.
 
 ## Notification recipients

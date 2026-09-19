@@ -112,29 +112,6 @@ Get-Content -AsByteStream unispace.dump | docker compose exec -T database pg_res
 
 Use the configured `POSTGRES_USER` and `POSTGRES_DB` instead when their defaults were changed.
 
-## Run the Phase 5 migration in Docker
-
-Do not start the demo backend before a real import: Phase 5 requires an empty database. Start only PostgreSQL:
-
-```powershell
-docker compose up -d --wait database
-```
-
-Run a dry validation with read-only exports and a separate writable report directory:
-
-```powershell
-docker compose run --rm `
-  -e SPRING_PROFILES_ACTIVE=migration `
-  -e MIGRATION_INPUT_DIR=/migration `
-  -e MIGRATION_REPORT_FILE=/reports/migration-report.json `
-  -e MIGRATION_DRY_RUN=true `
-  --volume "D:\exports\unispace:/migration:ro" `
-  --volume "D:\exports\reports:/reports" `
-  backend
-```
-
-After reviewing a `DRY_RUN_VALID` report, repeat with `MIGRATION_DRY_RUN=false`. Then start the full stack with `docker compose up -d --wait`. See the [Phase 5 migration guide](../migration/mongodb-to-postgresql.md) for data rules and reconciliation.
-
 ## Configuration reference
 
 | Variable | Default | Purpose |

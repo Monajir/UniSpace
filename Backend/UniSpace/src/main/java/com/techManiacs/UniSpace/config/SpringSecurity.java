@@ -5,7 +5,6 @@ import com.techManiacs.UniSpace.domain.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -20,7 +19,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 @EnableWebSecurity
-@Profile("!migration")
 public class SpringSecurity {
 
 //    @Autowired
@@ -34,12 +32,16 @@ public class SpringSecurity {
 
         return http.cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/actuator/health/**", "/public/**", "/api/classrooms", "/api/bookings/classSchedule/**").permitAll()
-                        .requestMatchers("/api/bookings/room/book").hasRole(Role.CR.value())
-                        .requestMatchers("/api/bookings/faculty", "/api/bookings/faculty/**").hasRole(Role.FACULTY.value())
+                        .requestMatchers("/actuator/health/**", "/api/auth/login", "/api/classrooms", "/api/classrooms/*/schedule").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/bookings").hasRole(Role.CR.value())
+                        .requestMatchers("/api/bookings/assigned-to-me").hasRole(Role.FACULTY.value())
+                        .requestMatchers(org.springframework.http.HttpMethod.PATCH,
+                                "/api/bookings/*/approve", "/api/bookings/*/reject")
+                                .hasAnyRole(Role.ADMIN.value(), Role.FACULTY.value())
                         .requestMatchers("/api/notifications", "/api/notifications/**").authenticated()
-                        .requestMatchers("/student/my/bookings/**", "/student/role-request").hasRole(Role.STUDENT.value())
-                        .requestMatchers("/api/bookings/**", "/roles/**").hasRole(Role.ADMIN.value())
+                        .requestMatchers("/api/me/bookings/**", "/api/me/routine").hasRole(Role.STUDENT.value())
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/role-requests").hasRole(Role.STUDENT.value())
+                        .requestMatchers("/api/bookings/**", "/api/role-requests/**", "/api/users/**").hasRole(Role.ADMIN.value())
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

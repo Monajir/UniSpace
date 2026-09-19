@@ -1,6 +1,7 @@
 package com.techManiacs.UniSpace.service;
 
 import com.techManiacs.UniSpace.domain.BookingStatus;
+import com.techManiacs.UniSpace.domain.Role;
 import com.techManiacs.UniSpace.exception.ApiException;
 import com.techManiacs.UniSpace.model.Booking;
 import com.techManiacs.UniSpace.model.Routine;
@@ -98,17 +99,19 @@ public class BookingService {
 
     @Transactional
     public Booking makeBookingRequest(Booking booking, String email) {
-        User user = userService.getUerByEmail(email);
+        User user = userService.getUserByEmail(email);
         if (user == null) {
             throw new ApiException(HttpStatus.NOT_FOUND, "Authenticated user no longer exists");
         }
 
         validateBookingRequest(booking);
         booking.setFacultyEmail(InstitutionalEmailValidator.normalize(booking.getFacultyEmail()));
+        User faculty = requireRegisteredFaculty(booking.getFacultyEmail());
+        validateSchedule(booking, true, true);
         booking.setCreatedAt(LocalDate.now());
         booking.setUserId(user.getId());
         booking.setStatus(BookingStatus.PENDING);
-        booking.setFacultyName(booking.getFacultyEmail().split("@")[0]);
+        booking.setFacultyName(faculty.getName());
         Booking saved = bookingRepo.save(booking);
         notificationService.bookingRequested(saved);
         return saved;
@@ -238,7 +241,19 @@ public class BookingService {
         }
         validateTimes(booking.getStartTime(), booking.getEndTime());
         booking.setDay(day(booking.getBookingDate()));
-        validateSchedule(booking, true, true);
+    }
+
+    private User requireRegisteredFaculty(String email) {
+        User faculty = userService.getUserByEmail(email);
+        boolean hasFacultyRole = faculty != null
+                && faculty.getRoles() != null
+                && faculty.getRoles().stream().anyMatch(Role.FACULTY.value()::equalsIgnoreCase);
+        if (!hasFacultyRole) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "Faculty email must belong to a registered faculty account");
+        }
+        return faculty;
     }
 
     private void validateSchedule(Booking booking, boolean verifyClassroom, boolean includePendingConflicts) {

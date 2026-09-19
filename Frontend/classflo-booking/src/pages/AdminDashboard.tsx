@@ -2001,7 +2001,7 @@ export default function AdminDashboard() {
   const fetchPendingRoleRequests = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(apiUrl('/roles/pending'), {
+      const response = await fetch(apiUrl('/api/role-requests'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -2029,7 +2029,7 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem('auth_token');
       // Replace with your actual API endpoint for fetching users
-      const response = await fetch(apiUrl('/roles/all'), {
+      const response = await fetch(apiUrl('/api/users'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -2152,7 +2152,7 @@ export default function AdminDashboard() {
   const handleApproveRole = async (id: string) => {
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(apiUrl(`/roles/${id}/approve`), {
+      const response = await fetch(apiUrl(`/api/role-requests/${id}/approve`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -2174,7 +2174,7 @@ export default function AdminDashboard() {
   const handleRejectRole = async (id: string) => {
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(apiUrl(`/roles/${id}/reject`), {
+      const response = await fetch(apiUrl(`/api/role-requests/${id}/reject`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -2256,7 +2256,7 @@ export default function AdminDashboard() {
       console.log('Token exists: ', !!token);
       console.log('Request payload: ', newUser);
 
-      const response = await fetch(apiUrl('/roles/create/user'), {
+      const response = await fetch(apiUrl('/api/users'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2286,7 +2286,7 @@ export default function AdminDashboard() {
 
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(apiUrl(`/roles/delete/${userPendingDeletion.id}`), {
+      const response = await fetch(apiUrl(`/api/users/${userPendingDeletion.id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

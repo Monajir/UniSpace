@@ -194,8 +194,8 @@ export function useBookings(classroomId: string) {
         setLoading(true);
         setError(null);
         
-        const url = apiUrl(`/api/bookings/classSchedule/${classroomId}`);
-        const nextUrl = apiUrl(`/api/bookings/classSchedule/next/${classroomId}`);
+        const url = apiUrl(`/api/classrooms/${classroomId}/schedule?week=current`);
+        const nextUrl = apiUrl(`/api/classrooms/${classroomId}/schedule?week=next`);
         
         // Fetch current week data
         const response = await fetch(url);
@@ -251,7 +251,7 @@ export function useBookings(classroomId: string) {
   ): Promise<ApiResponse<Booking>> => {
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(apiUrl('/api/bookings/room/book'), {
+      const response = await fetch(apiUrl('/api/bookings'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

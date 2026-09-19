@@ -22,7 +22,6 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, fullName: string, role: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -70,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const response = await fetch(apiUrl('/public/login'), {
+      const response = await fetch(apiUrl('/api/auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,27 +92,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: string) => {
-    try {
-      const response = await fetch(apiUrl('/public/signup'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, fullName, role }),
-      });
-
-      if (response.ok) {
-        return { error: null };
-      } else {
-        const errorData = await response.json();
-        return { error: errorData.message || 'Registration failed' };
-      }
-    } catch (error) {
-      return { error: 'Network error.' };
-    }
-  };
-
   const signOut = async () => {
     localStorage.removeItem('auth_token');
     setUser(null);
@@ -125,7 +103,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     loading,
     signIn,
-    signUp,
     signOut,
   };
 

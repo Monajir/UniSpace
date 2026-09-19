@@ -11,11 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
@@ -27,7 +29,7 @@ public class AuthController {
     private ApiMapper apiMapper;
 
 
-    @GetMapping("/api/auth/me")
+    @GetMapping("/me")
     public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String authHeader) {
         try {
             // Extract the token from the Bearer header
@@ -41,7 +43,7 @@ public class AuthController {
                 return ResponseEntity.status(401).body("Invalid Token");
             }
 
-            UserDto user = apiMapper.toUserDto(userService.getUerByEmail(username));
+            UserDto user = apiMapper.toUserDto(userService.getUserByEmail(username));
             Profile profile = profileService.getProfileByEmail(username);
             String newToken = null;
 

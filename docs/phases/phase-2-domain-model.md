@@ -43,7 +43,7 @@ Separate the HTTP API contract from MongoDB persistence details so that the appl
 - Managed users and pending roles now expose `id`, not `_id`.
 - Booking status values remain lowercase for frontend compatibility.
 - Role values remain uppercase for frontend and Spring Security compatibility.
-- `POST /api/bookings/room/book` returns the created booking directly with HTTP `201`.
+- `POST /api/bookings` returns the created booking directly with HTTP `201`.
 - Dates and times have explicit, database-independent JSON formats.
 
 ## PostgreSQL design decisions

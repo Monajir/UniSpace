@@ -21,7 +21,7 @@ Create a secure, reproducible baseline before changing the domain model, databas
 ### Authentication and authorization
 
 - Changed Spring Security to stateless session handling.
-- Restricted all `/roles/**` operations, including user creation, to administrators.
+- Restricted user-administration and role-request review operations to administrators.
 - Restored the bearer token on the frontend's create-user request.
 - Made malformed bearer tokens fail authentication without breaking the filter chain.
 - Replaced authentication responses containing the persistence `User` entity with a safe response containing only ID, email, and roles.
@@ -72,8 +72,8 @@ The frontend example is in `Frontend/classflo-booking/.env.example`.
 
 - Login and `/api/auth/me` now return a safe `user` object: `id`, `email`, and `roles`.
 - Password hashes are never serialized.
-- `/roles/create/user` requires an authenticated administrator.
-- `DELETE /student/my/bookings/{id}` returns `204` for an owned booking and `404` when no booking belonging to that user exists.
+- `POST /api/users` requires an authenticated administrator.
+- `DELETE /api/me/bookings/{id}` returns `204` for an owned booking and `404` when no booking belonging to that user exists.
 - Handled API failures use this shape:
 
 ```json

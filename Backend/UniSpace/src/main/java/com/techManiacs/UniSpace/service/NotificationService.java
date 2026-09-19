@@ -66,7 +66,7 @@ public class NotificationService {
                 "Booking request submitted",
                 bookingMessage(booking, room, "is awaiting review"));
 
-        User faculty = userService.getUerByEmail(booking.getFacultyEmail());
+        User faculty = userService.getUserByEmail(booking.getFacultyEmail());
         if (faculty != null && faculty.getRoles().stream().anyMatch(role -> role.equalsIgnoreCase("FACULTY"))) {
             create(
                     faculty.getId(),
@@ -120,7 +120,7 @@ public class NotificationService {
     }
 
     private User requireUser(String email) {
-        User user = userService.getUerByEmail(email);
+        User user = userService.getUserByEmail(email);
         if (user == null) {
             throw new ApiException(HttpStatus.NOT_FOUND, "Authenticated user no longer exists");
         }

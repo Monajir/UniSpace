@@ -38,7 +38,7 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/read-all")
+    @PatchMapping
     public ResponseEntity<Void> markAllRead(Authentication authentication) {
         notificationService.markAllRead(authentication.getName());
         return ResponseEntity.noContent().build();

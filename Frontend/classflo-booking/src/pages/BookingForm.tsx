@@ -250,6 +250,9 @@ export default function BookingForm() {
                       placeholder="faculty@iut-dhaka.edu"
                       required
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Enter the email of a registered UniSpace faculty account.
+                    </p>
                   </div>
                 </div>
                 
@@ -269,6 +272,7 @@ export default function BookingForm() {
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Booking time must match one published 1 hour 15 minute slot</li>
                     <li>• A course code is required for every request</li>
+                    <li>• The faculty email must belong to a registered faculty account</li>
                     <li>• Bookings require faculty approval</li>
                     <li>• Cancel at least 2 hours in advance</li>
                     <li>• Ensure room is left clean and organized</li>

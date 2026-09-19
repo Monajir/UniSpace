@@ -1,1 +1,0 @@
-{"_id":{"$oid":"507f1f77bcf86cd799439031"},"classroomId":{"$oid":"507f1f77bcf86cd799439021"},"facultyName":"Migration Faculty","courseCode":"CSE-500","day":"TUESDAY","startTime":"09:00","endTime":"10:00","program":"CSE","semester":5,"section":1}

@@ -9,12 +9,9 @@ import com.techManiacs.UniSpace.repository.ClassroomRepo;
 import com.techManiacs.UniSpace.repository.RoutineRepo;
 import com.techManiacs.UniSpace.repository.UserRepository;
 import com.techManiacs.UniSpace.service.BookingService;
-import com.techManiacs.UniSpace.service.PendingRolesService;
 import com.techManiacs.UniSpace.utils.BookingResponse;
-import com.techManiacs.UniSpace.utils.RoleRequest;
 import com.techManiacs.UniSpace.utils.RoutineResponse;
 import com.techManiacs.UniSpace.domain.BookingStatus;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +29,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/student")
+@RequestMapping("/api/me")
 public class StudentController {
     @Autowired
     UserRepository userRepo;
@@ -46,15 +43,7 @@ public class StudentController {
     @Autowired
     BookingService bookingService;
 
-    @Autowired
-    private PendingRolesService pendingRolesService;
-
-    @GetMapping("/auth-check")
-    public String authCheck() {
-        return "OK";
-    }
-
-    @GetMapping("/my/bookings")
+    @GetMapping("/bookings")
     public ResponseEntity<?> getMyBookings() {
         try{
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -96,7 +85,7 @@ public class StudentController {
         }
     }
 
-    @GetMapping("/my/routine")
+    @GetMapping("/routine")
     public ResponseEntity<?> getMyRoutine() {
         try{
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -146,7 +135,7 @@ public class StudentController {
         return classObj;
     }
 
-    @DeleteMapping("/my/bookings/{bookingId}")
+    @DeleteMapping("/bookings/{bookingId}")
     public ResponseEntity<?> deleteBooking(@PathVariable String bookingId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepo.findByEmail(auth.getName());
@@ -154,13 +143,4 @@ public class StudentController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/role-request")
-    public ResponseEntity<?> updateRole(@RequestBody RoleRequest roleRequest) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-
-        pendingRolesService.makePendingRole(email, roleRequest.getRequestedRole());
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 }

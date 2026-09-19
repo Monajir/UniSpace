@@ -46,13 +46,7 @@ Package the React frontend, Spring Boot backend, and PostgreSQL database as a re
 - The health endpoint is publicly readable for container orchestration but does not expose component details.
 - Backend health includes database connectivity, ensuring an application is not marked ready when PostgreSQL is unavailable.
 - PostgreSQL uses `pg_isready`; Nginx uses its local `/healthz` endpoint.
-- Existing `/public/health-check` remains available for application-level proxy verification.
-
-### Migration compatibility
-
-- The Phase 5 migration profile runs successfully as a one-off Compose backend job.
-- Export data can be mounted read-only while its report is written to a separate mounted output directory.
-- The normal backend is not required for migration; only PostgreSQL must be started first.
+- The frontend proxy forwards the normalized `/api/**` namespace; container health uses `/actuator/health` directly.
 
 ## Verification
 
@@ -68,7 +62,6 @@ Package the React frontend, Spring Boot backend, and PostgreSQL database as a re
 - PostgreSQL inspection confirmed the administrator role and profile foreign key.
 - The database had no published host ports, and its Docker network reported `internal=true`.
 - Removing all containers and networks without deleting volumes preserved exactly one administrator across stack recreation.
-- A containerized Phase 5 dry run converted six fixture documents and wrote a valid report through mounted directories.
 - Backend Maven suite: 27 passed, 0 failed.
 - Frontend production build passes; its existing bundle-size and stale Browserslist-data advisories remain non-blocking.
 
@@ -76,7 +69,7 @@ The test host already used port 8080, so end-to-end frontend verification used t
 
 ## Operations
 
-Build, startup, logs, persistence, backup/restore, migration jobs, configuration, and destructive volume cleanup are documented in the [Docker Compose deployment guide](../deployment/docker-compose.md).
+Build, startup, logs, persistence, backup/restore, configuration, and destructive volume cleanup are documented in the [Docker Compose deployment guide](../deployment/docker-compose.md).
 
 ## Deferred to Phase 7
 

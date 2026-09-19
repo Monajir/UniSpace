@@ -79,5 +79,4 @@ Refresh image layers for later reviews; a cached image can retain operating-syst
 - Run the backend tests, frontend lint/build, production dependency audit, and automated release gate.
 - Scan the newly built runtime images, not stale local tags.
 - Verify backup and restore on the target environment before importing real data.
-- Record image digests, configuration source, migration report, and release-check result for the deployment.
-
+- Record image digests, configuration source, Flyway schema version, and release-check result for the deployment.
