@@ -101,32 +101,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen gradient-surface relative">
-      {/* Architectural blueprint background */}
-      <div className="blueprint-background fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-        <div className="blueprint-grid absolute inset-0" />
-        <svg className="blueprint-plan" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
-          <g className="blueprint-plan-main">
-            <path d="M78 128H386V74H716V196H1048V112H1360V470H1234V718H884V814H452V730H80Z" />
-            <path d="M386 128V362H188V560H452V730M716 196V470H1048V718M452 362H884V814M1048 470H1234" />
-            <rect x="112" y="164" width="210" height="154" rx="8" />
-            <rect x="464" y="118" width="190" height="178" rx="8" />
-            <rect x="782" y="232" width="210" height="172" rx="8" />
-            <rect x="1084" y="150" width="214" height="222" rx="8" />
-            <rect x="230" y="454" width="172" height="210" rx="8" />
-            <rect x="518" y="438" width="286" height="214" rx="8" />
-            <rect x="918" y="536" width="238" height="136" rx="8" />
-          </g>
-          <g className="blueprint-route">
-            <path d="M178 242H560V526H700V318H888V604H1088" />
-            <circle cx="178" cy="242" r="8" />
-            <circle cx="560" cy="526" r="8" />
-            <circle cx="700" cy="318" r="8" />
-            <circle cx="888" cy="604" r="8" />
-            <circle cx="1088" cy="604" r="8" />
-          </g>
-        </svg>
-        <div className="blueprint-scan" />
-        <div className="blueprint-vignette absolute inset-0" />
+      {/* Theme-aware static landing background */}
+      <div className="landing-background fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <div className="landing-background-image absolute inset-0" />
+        <div className="landing-background-overlay absolute inset-0" />
       </div>
 
       {/* Content */}

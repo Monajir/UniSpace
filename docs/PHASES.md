@@ -37,3 +37,9 @@ Each phase is documented only after its implementation and verification are comp
 | Phase | Status | Documentation |
 |---|---|---|
 | 1 — REST-style route normalization | Complete | [API route normalization](phases/api-route-normalization.md) |
+
+## Frontend design track
+
+| Phase | Status | Documentation |
+|---|---|---|
+| Theme-aware landing page backgrounds | Complete | [Landing page theme backgrounds](phases/landing-page-theme-backgrounds.md) |
