@@ -625,14 +625,12 @@ import { BOOKING_SLOTS, BookingSlot } from "@/lib/bookingSlots";
 import { useAuth } from "@/hooks/useAuth";
 import {
   ArrowLeft,
-  ArrowRight,
   Calendar,
   Clock,
   MapPin,
   Users,
   ChevronLeft,
   ChevronRight,
-  Info,
 } from "lucide-react";
 import { gsap } from "gsap";
 
@@ -653,7 +651,7 @@ const overlaps = (
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-type SlotStatus = "available" | "booked" | "pending" | "past";
+type SlotStatus = "available" | "booked" | "pending" | "past" | "loading" | "unavailable";
 
 type Slot = BookingSlot;
 
@@ -664,11 +662,9 @@ export default function ClassroomSchedule() {
   const navigate = useNavigate();
   const [weekOffset, setWeekOffset] = useState(0);
   const { classrooms } = useClassrooms();
-  const { bookings, routines, nextBookings } = useBookings(id);
+  const { bookings, routines, loading, error } = useBookings(id, weekOffset);
   const { user } = useAuth();
   const canBook = user?.roles?.some((role) => role.toUpperCase() === "CR") ?? false;
-  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-  const [showNextWeek, setShowNextWeek] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const classroom = classrooms.find((c) => String(c.id) === String(id));
@@ -687,7 +683,7 @@ export default function ClassroomSchedule() {
         }
       );
     }
-  }, [weekOffset, showNextWeek]);
+  }, [weekOffset]);
 
   const formatDateForInput = (date: Date) => {
     const year = date.getFullYear();
@@ -699,14 +695,10 @@ export default function ClassroomSchedule() {
   const handleSlotClick = (
     day: string,
     start_time: string,
-    end_time: string,
-    week: number
+    end_time: string
   ) => {
     const slot: Slot = timeSlots.find((x) => x.start === start_time);
-    const status =
-      week === 1
-        ? getWeeklySlotStatus(day, slot).status
-        : getNextWeekSlotStatus(day, slot).status;
+    const status = getSlotStatus(day, slot).status;
 
     if (canBook && status === "available") {
       const dayIndex = [
@@ -736,7 +728,6 @@ export default function ClassroomSchedule() {
 
       const formattedDate = formatDateForInput(targetDate);
 
-      setSelectedSlot(slot);
       navigate(
         `/booking/${id}?day=${day}&start_time=${start_time}&end_time=${end_time}&slotDate=${formattedDate}`
       );
@@ -753,6 +744,9 @@ export default function ClassroomSchedule() {
         return "status-pending";
       case "past":
         return "status-past";
+      case "loading":
+      case "unavailable":
+        return "status-past";
       default:
         return "";
     }
@@ -768,17 +762,22 @@ export default function ClassroomSchedule() {
         return "⏳";
       case "past":
         return "⌛";
+      case "loading":
+        return "…";
+      case "unavailable":
+        return "!";
       default:
         return "";
     }
   };
 
-  // Core Functions - Fixed versions
-  function getWeeklySlotStatus(
+  function getSlotStatus(
     day: string,
     slot: Slot
   ): { status: SlotStatus; course_code?: string; faculty_name?: string } {
-    /// Setting past as grey
+    if (loading) return { status: "loading" };
+    if (error) return { status: "unavailable" };
+
     const today = new Date();
     const todayMidnight = new Date(
       today.getFullYear(),
@@ -786,7 +785,6 @@ export default function ClassroomSchedule() {
       today.getDate()
     );
 
-    // MONDAY FIRST DAY OF THE WEEK
     const dayIndex = [
       "Monday",
       "Tuesday",
@@ -798,19 +796,12 @@ export default function ClassroomSchedule() {
     ].indexOf(day);
     if (dayIndex === -1) throw new Error(`Invalid day: ${day}`);
 
-    // Get Monday of this week // Monday is start of the week
-    const monday = new Date(todayMidnight);
-    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7)); // adjust to Monday
-
-    // Actual date for the given "day"
-    const slotDate = new Date(monday);
-    slotDate.setDate(monday.getDate() + dayIndex);
+    const slotDate = weekDates[dayIndex];
 
     if (slotDate < todayMidnight) {
-      return { status: "past" as SlotStatus }; // Handle "past" style in UI
+      return { status: "past" };
     }
 
-    // 1) Weekly routine wins (treat as booked)
     const r = routines.find(
       (x) =>
         x.day === day &&
@@ -824,15 +815,15 @@ export default function ClassroomSchedule() {
       };
     }
 
-    // 2) Bookings for this week (backend already filtered to the week)
+    const selectedDate = formatDateForInput(slotDate);
     const relevant = bookings.filter(
       (b) =>
+        b.booking_date === selectedDate &&
         b.day === day &&
         overlaps(slot.start, slot.end, b.start_time, b.end_time)
     );
 
     if (relevant.length > 0) {
-      // prioritize statuses: pending < approved < rejected (rejected doesn't block)
       const hasApproved = relevant.find((b) => b.status === "booked");
       const hasPending = relevant.find((b) => b.status === "pending");
       if (hasApproved)
@@ -851,51 +842,6 @@ export default function ClassroomSchedule() {
 
     return { status: "available" };
   }
-
-  // Fixed getNextWeekSlotStatus function
-function getNextWeekSlotStatus(
-  day: string,
-  slot: Slot
-): { status: SlotStatus; course_code?: string; faculty_name?: string } {
-  // 1) Weekly routine wins (treat as booked) - routines repeat every week
-  const r = routines.find(
-    (x) =>
-      x.day === day &&
-      overlaps(slot.start, slot.end, x.start_time, x.end_time)
-  );
-  if (r) {
-    return {
-      status: "booked",
-      course_code: r.course_code,
-      faculty_name: r.faculty_name,
-    };
-  }
-
-  // 2) Bookings for next week - make sure we're checking the right day
-  const relevant = nextBookings.filter((b) =>
-    b.day === day && // This was missing in your original code
-    overlaps(slot.start, slot.end, b.start_time, b.end_time)
-  );
-
-  if (relevant.length > 0) {
-    // prioritize statuses: pending < approved < rejected (rejected doesn't block)
-    const hasApproved = relevant.find((b) => b.status === "booked");
-    const hasPending = relevant.find((b) => b.status === "pending");
-    
-    if (hasApproved) return {
-      status: "booked",
-      course_code: hasApproved.course_code,
-      faculty_name: hasApproved.faculty_name,
-    };
-    if (hasPending) return { 
-      status: "pending",
-      course_code: hasPending.course_code,
-      faculty_name: hasPending.faculty_name, 
-    };
-  }
-
-  return { status: "available" };
-}
 
   if (!classroom) {
     return (
@@ -978,7 +924,11 @@ function getNextWeekSlotStatus(
 
             <div className="text-center">
               <h2 className="text-xl font-bold text-primary">
-                {weekOffset === 0 ? "Current Week" : `Week ${weekOffset + 1}`}
+                {weekOffset === 0
+                  ? "Current Week"
+                  : weekOffset === 1
+                  ? "Next Week"
+                  : `Week ${weekOffset + 1}`}
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
                 {weekDates[0].toLocaleDateString()} -{" "}
@@ -989,7 +939,6 @@ function getNextWeekSlotStatus(
             <Button
               variant="outline"
               onClick={() => setWeekOffset((prev) => prev + 1)}
-              disabled={weekOffset >= 1} // Disable when weekOffset is 1 or more (week 2+)
               className="flex items-center gap-2"
             >
               Next Week
@@ -1041,9 +990,7 @@ function getNextWeekSlotStatus(
                       </div>
                       {days.map((day) => {
                         const { status, course_code, faculty_name } =
-                          weekOffset === 0
-                            ? getWeeklySlotStatus(day, slot)
-                            : getNextWeekSlotStatus(day, slot);
+                          getSlotStatus(day, slot);
                         return (
                           <div
                             key={`cell-${day}-${slot.start}-${slot.end}`}
@@ -1063,8 +1010,7 @@ function getNextWeekSlotStatus(
                               handleSlotClick(
                                 day,
                                 slot.start,
-                                slot.end,
-                                weekOffset === 0 ? 1 : 2
+                                slot.end
                               )
                             }
                           >
@@ -1124,105 +1070,6 @@ function getNextWeekSlotStatus(
             </CardContent>
           </Card>
 
-          {/* Next Week Toggle */}
-          {/* <div className="flex justify-center mt-8">
-            <Button
-              variant="outline"
-              onClick={() => setShowNextWeek(!showNextWeek)}
-              className="flex items-center gap-2"
-            >
-              {showNextWeek ? 'Hide Next Week' : 'Show Next Week'}
-              {showNextWeek ? <ChevronRight className="h-4 w-4" /> : <Info className="h-4 w-4" />}
-            </Button>
-          </div> */}
-
-          {/* Next Week Schedule */}
-          {showNextWeek && (
-            <div className="mt-6">
-              <Card className="glass shadow-elegant">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Next Week Schedule
-                  </CardTitle>
-                </CardHeader>
-
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <div className="min-w-[800px]">
-                      {/* Header */}
-                      <div className="grid grid-cols-6 gap-2 mb-4">
-                        <div className="p-3 font-semibold text-center">
-                          Time
-                        </div>
-                        {days.map((day) => (
-                          <div
-                            key={`day-${day}`}
-                            className="p-3 font-semibold text-center"
-                          >
-                            {day}
-                          </div>
-                        ))}
-                      </div>
-                      {timeSlots.map((slot) => (
-                        <div
-                          key={`row-${slot.start}-${slot.end}`}
-                          className="grid grid-cols-6 gap-2 mb-2"
-                        >
-                          <div className="p-3 font-medium text-center bg-muted rounded-lg">
-                            {slot.label}
-                          </div>
-                          {days.map((day) => {
-                            const { status, course_code, faculty_name } =
-                              getNextWeekSlotStatus(day, slot);
-                            return (
-                              <div
-                                key={`cell-${day}-${slot.start}-${slot.end}`}
-                                className={`time-slot p-3 rounded-lg border-2 transition-all duration-200 ${getStatusColor(
-                                  status
-                                )} ${
-                                  status === "available" && canBook
-                                    ? "cursor-pointer hover-scale hover:shadow-soft"
-                                    : status === "available"
-                                    ? "cursor-default"
-                                    : status === "past"
-                                    ? "cursor-not-allowed opacity-50"
-                                    : "cursor-not-allowed opacity-75"
-                                }`}
-                                onClick={() =>
-                                  canBook && status === "available" &&
-                                  handleSlotClick(day, slot.start, slot.end, 2)
-                                }
-                              >
-                                <div className="text-center">
-                                  <div className="text-sm font-medium flex items-center justify-center gap-1">
-                                    <span className="text-xs">
-                                      {getStatusIcon(status)}
-                                    </span>
-                                    <span className="capitalize">{status}</span>
-                                  </div>
-                                  {status !== "available" && course_code && (
-                                    <div className="text-xs mt-1 opacity-70">
-                                      {course_code}
-                                      {faculty_name && (
-                                        <div className="truncate">
-                                          {faculty_name}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
         </div>
       </div>
     </div>

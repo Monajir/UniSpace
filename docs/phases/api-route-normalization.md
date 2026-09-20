@@ -26,8 +26,8 @@ Important route changes:
 |---|---|
 | `POST /public/login` | `POST /api/auth/login` |
 | `POST /api/bookings/room/book` | `POST /api/bookings` |
-| `GET /api/bookings/classSchedule/{id}` | `GET /api/classrooms/{id}/schedule?week=current` |
-| `GET /api/bookings/classSchedule/next/{id}` | `GET /api/classrooms/{id}/schedule?week=next` |
+| `GET /api/bookings/classSchedule/{id}` | `GET /api/classrooms/{id}/schedule?weekStart=YYYY-MM-DD` |
+| `GET /api/bookings/classSchedule/next/{id}` | Unified into the same date-based schedule endpoint |
 | `GET /api/bookings/faculty` | `GET /api/bookings/assigned-to-me` |
 | Faculty-specific approval/rejection paths | Shared `/api/bookings/{id}/approve` and `/reject` paths |
 | `/student/my/bookings` | `/api/me/bookings` |
@@ -38,6 +38,8 @@ Important route changes:
 | `PATCH /api/notifications/read-all` | `PATCH /api/notifications` |
 
 Approval and rejection remain explicit command endpoints. This is a deliberate pragmatic choice: it preserves clear authorization and transition-specific service methods while the rest of each path remains resource-oriented.
+
+The optional `weekStart` query parameter accepts an ISO date. The backend normalizes that date to its Monday and returns the Monday-to-Friday schedule. Omitting it returns the current week. This replaces the original fixed `current`/`next` selector and supports any future week.
 
 ## Structural Cleanup
 
@@ -61,4 +63,3 @@ Legacy route aliases were intentionally not retained. The frontend and backend m
 - Frontend lint passed with 0 errors and the same 8 existing Fast Refresh warnings.
 - Frontend production build passed; existing stale Browserslist-data and bundle-size advisories remain non-blocking.
 - Docker Compose configuration validation passed.
-

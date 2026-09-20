@@ -7,16 +7,16 @@ import com.techManiacs.UniSpace.mapper.ApiMapper;
 import com.techManiacs.UniSpace.service.ClassroomService;
 import com.techManiacs.UniSpace.service.BookingService;
 import com.techManiacs.UniSpace.utils.RoomScheduleResponse;
-import com.techManiacs.UniSpace.exception.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,12 +39,10 @@ public class ClassroomController {
     @GetMapping("/{id}/schedule")
     public ResponseEntity<?> getSchedule(
             @PathVariable UUID id,
-            @RequestParam(defaultValue = "current") String week) {
-        RoomScheduleResponse response = switch (week.toLowerCase()) {
-            case "current" -> bookingService.getAllSchedule(id);
-            case "next" -> bookingService.getAllScheduleNextWeek(id);
-            default -> throw new ApiException(HttpStatus.BAD_REQUEST, "week must be current or next");
-        };
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) {
+        RoomScheduleResponse response = bookingService.getSchedule(
+                id, weekStart == null ? LocalDate.now() : weekStart);
         return ResponseEntity.ok(apiMapper.toRoomScheduleDto(response));
     }
 }

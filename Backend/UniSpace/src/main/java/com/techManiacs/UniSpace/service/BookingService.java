@@ -19,6 +19,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -64,35 +65,12 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public RoomScheduleResponse getAllSchedule(UUID roomId) {
-        List<Booking> extras = bookingRepo.findAllByClassroomId(roomId);
+    public RoomScheduleResponse getSchedule(UUID roomId, LocalDate requestedWeekStart) {
+        LocalDate monday = requestedWeekStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate friday = monday.plusDays(4);
+        List<Booking> extras = bookingRepo.findAllByClassroomIdAndBookingDateBetweenAndStatusIn(
+                roomId, monday, friday, CALENDAR_STATUSES);
         List<Routine> regular = routineRepo.findAllByClassroomId(roomId);
-        LocalDate today = LocalDate.now();
-        LocalDate monday = today.with(DayOfWeek.MONDAY);
-        LocalDate friday = today.with(DayOfWeek.FRIDAY);
-
-        extras = extras.stream()
-                .filter(booking -> CALENDAR_STATUSES.contains(booking.getStatus())
-                        && !booking.getBookingDate().isBefore(monday)
-                        && !booking.getBookingDate().isAfter(friday))
-                .toList();
-
-        return new RoomScheduleResponse(regular, extras);
-    }
-
-    @Transactional(readOnly = true)
-    public RoomScheduleResponse getAllScheduleNextWeek(UUID roomId) {
-        List<Booking> extras = bookingRepo.findAllByClassroomId(roomId);
-        List<Routine> regular = routineRepo.findAllByClassroomId(roomId);
-        LocalDate today = LocalDate.now();
-        LocalDate monday = today.with(DayOfWeek.MONDAY).plusWeeks(1);
-        LocalDate friday = today.with(DayOfWeek.FRIDAY).plusWeeks(1);
-
-        extras = extras.stream()
-                .filter(booking -> CALENDAR_STATUSES.contains(booking.getStatus())
-                        && !booking.getBookingDate().isBefore(monday)
-                        && !booking.getBookingDate().isAfter(friday))
-                .toList();
 
         return new RoomScheduleResponse(regular, extras);
     }

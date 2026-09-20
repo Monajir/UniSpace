@@ -136,7 +136,7 @@
 
 
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { apiErrorMessage, apiUrl } from "@/lib/api";
 import {
   BOOKING_SCHEDULE_UPDATED_EVENT,
@@ -182,48 +182,54 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-export function useBookings(classroomId: string) {
+const weekStartForOffset = (weekOffset: number) => {
+  const today = new Date();
+  const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7) + weekOffset * 7);
+
+  const year = monday.getFullYear();
+  const month = String(monday.getMonth() + 1).padStart(2, '0');
+  const day = String(monday.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export function useBookings(classroomId: string, weekOffset = 0) {
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [nextBookings, setNextBookings] = useState<Booking[]>([]);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const latestRequestId = useRef(0);
 
   const fetchBookings = useCallback(async () => {
+      const requestId = ++latestRequestId.current;
       try {
         setLoading(true);
         setError(null);
         
-        const url = apiUrl(`/api/classrooms/${classroomId}/schedule?week=current`);
-        const nextUrl = apiUrl(`/api/classrooms/${classroomId}/schedule?week=next`);
-        
-        // Fetch current week data
+        const weekStart = weekStartForOffset(weekOffset);
+        const url = apiUrl(
+          `/api/classrooms/${classroomId}/schedule?weekStart=${encodeURIComponent(weekStart)}`
+        );
+
         const response = await fetch(url);
         if (!response.ok) {
-          throw new Error(`Failed to fetch this week bookings: ${response.status}`);
+          throw new Error(`Failed to fetch schedule: ${response.status}`);
         }
         const data: RoomScheduleResponse = await response.json();
+        if (requestId !== latestRequestId.current) return;
         setBookings(data.extras || []);
         setRoutines(data.regular || []);
-
-        // Fetch next week data
-        const nextResponse = await fetch(nextUrl);
-        if (!nextResponse.ok) {
-          console.warn('Failed to fetch next week bookings, using empty array');
-          setNextBookings([]);
-        } else {
-          const nextData: RoomScheduleResponse = await nextResponse.json();
-          setNextBookings(nextData.extras || []);
-          // The current-week response already supplies the recurring routine data.
-        }
         
       } catch (err) {
+        if (requestId !== latestRequestId.current) return;
         setError(err instanceof Error ? err.message : 'An error occurred');
         console.error('Error fetching bookings:', err);
       } finally {
-        setLoading(false);
+        if (requestId === latestRequestId.current) {
+          setLoading(false);
+        }
       }
-  }, [classroomId]);
+  }, [classroomId, weekOffset]);
 
   useEffect(() => {
     if (classroomId) {
@@ -268,19 +274,6 @@ export function useBookings(classroomId: string) {
       const newBooking: Booking = await response.json();
 
       if (newBooking) {
-        // Add the new booking to the appropriate list based on its date
-        const bookingDate = new Date(newBooking.booking_date);
-        const today = new Date();
-        const nextWeek = new Date(today);
-        nextWeek.setDate(today.getDate() + 7);
-        
-        if (bookingDate >= nextWeek) {
-          // Booking is for next week or beyond
-          setNextBookings(prev => [...prev, newBooking]);
-        } else {
-          // Booking is for this week
-          setBookings(prev => [...prev, newBooking]);
-        }
         notifyBookingScheduleChanged();
       }
 
@@ -297,5 +290,5 @@ export function useBookings(classroomId: string) {
     }
   };
 
-  return { bookings, routines, nextBookings, loading, error, createBooking };
+  return { bookings, routines, loading, error, createBooking };
 }

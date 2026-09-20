@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,6 +86,20 @@ class UniSpaceApplicationTests {
 
     @Test
     void contextLoads() {
+    }
+
+    @Test
+    void classroomScheduleAcceptsAnArbitraryFutureWeekStart() throws Exception {
+        mockMvc.perform(get("/api/classrooms/{id}/schedule", UUID.randomUUID())
+                        .param("weekStart", "2030-01-07"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void classroomScheduleRejectsAnInvalidWeekStart() throws Exception {
+        mockMvc.perform(get("/api/classrooms/{id}/schedule", UUID.randomUUID())
+                        .param("weekStart", "not-a-date"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

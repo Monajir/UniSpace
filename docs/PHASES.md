@@ -43,3 +43,9 @@ Each phase is documented only after its implementation and verification are comp
 | Phase | Status | Documentation |
 |---|---|---|
 | Theme-aware landing page backgrounds | Complete | [Landing page theme backgrounds](phases/landing-page-theme-backgrounds.md) |
+
+## Schedule navigation track
+
+| Phase | Status | Documentation |
+|---|---|---|
+| 1 — Unlimited future-week schedules | Complete | [Unlimited future-week schedules](phases/unlimited-future-schedules.md) |

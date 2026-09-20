@@ -240,25 +240,30 @@ class BookingServiceTests {
         approved.setStatus(BookingStatus.BOOKED);
         Booking pending = booking(classroomId, monday, LocalTime.of(9, 0), LocalTime.of(10, 0));
         pending.setStatus(BookingStatus.PENDING);
-        Booking rejected = booking(classroomId, monday, LocalTime.of(10, 0), LocalTime.of(11, 0));
-        rejected.setStatus(BookingStatus.REJECTED);
-        when(bookingRepo.findAllByClassroomId(classroomId)).thenReturn(List.of(approved, pending, rejected));
+        when(bookingRepo.findAllByClassroomIdAndBookingDateBetweenAndStatusIn(
+                classroomId, monday, monday.plusDays(4),
+                List.of(BookingStatus.PENDING, BookingStatus.BOOKED)))
+                .thenReturn(List.of(approved, pending));
         when(routineRepo.findAllByClassroomId(classroomId)).thenReturn(List.of());
 
-        assertThat(bookingService.getAllSchedule(classroomId).getExtras())
+        assertThat(bookingService.getSchedule(classroomId, monday).getExtras())
                 .containsExactly(approved, pending);
+        verify(bookingRepo, never()).findAllByClassroomId(classroomId);
     }
 
     @Test
-    void nextWeekScheduleExposesPendingBooking() {
+    void arbitraryFutureWeekScheduleExposesPendingBooking() {
         UUID classroomId = UUID.randomUUID();
-        LocalDate nextMonday = LocalDate.now().with(DayOfWeek.MONDAY).plusWeeks(1);
-        Booking pending = booking(classroomId, nextMonday, LocalTime.of(9, 0), LocalTime.of(10, 0));
+        LocalDate futureMonday = LocalDate.now().with(DayOfWeek.MONDAY).plusWeeks(8);
+        Booking pending = booking(classroomId, futureMonday, LocalTime.of(9, 0), LocalTime.of(10, 0));
         pending.setStatus(BookingStatus.PENDING);
-        when(bookingRepo.findAllByClassroomId(classroomId)).thenReturn(List.of(pending));
+        when(bookingRepo.findAllByClassroomIdAndBookingDateBetweenAndStatusIn(
+                classroomId, futureMonday, futureMonday.plusDays(4),
+                List.of(BookingStatus.PENDING, BookingStatus.BOOKED)))
+                .thenReturn(List.of(pending));
         when(routineRepo.findAllByClassroomId(classroomId)).thenReturn(List.of());
 
-        assertThat(bookingService.getAllScheduleNextWeek(classroomId).getExtras())
+        assertThat(bookingService.getSchedule(classroomId, futureMonday.plusDays(2)).getExtras())
                 .containsExactly(pending);
     }
 
