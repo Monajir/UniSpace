@@ -74,6 +74,15 @@ public class ApiMapper {
                 classroom.getIsAvailable());
     }
 
+    public Classroom toClassroom(ClassroomCreateRequest request) {
+        Classroom classroom = new Classroom();
+        classroom.setRoom_number(request.roomNumber());
+        classroom.setBuilding(request.building());
+        classroom.setCapacity(request.capacity());
+        classroom.setEquipment(request.equipment());
+        return classroom;
+    }
+
     public ProfileDto toProfileDto(Profile profile) {
         if (profile == null) {
             return null;

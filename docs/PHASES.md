@@ -49,3 +49,10 @@ Each phase is documented only after its implementation and verification are comp
 | Phase | Status | Documentation |
 |---|---|---|
 | 1 — Unlimited future-week schedules | Complete | [Unlimited future-week schedules](phases/unlimited-future-schedules.md) |
+
+## Administration track
+
+| Phase | Status | Documentation |
+|---|---|---|
+| 1 — Administrator classroom creation | Complete | [Administrator classroom creation](phases/admin-classroom-creation.md) |
+| 2 — Administrator classroom update and deletion | Complete | [Administrator classroom update and deletion](phases/admin-classroom-update-delete.md) |

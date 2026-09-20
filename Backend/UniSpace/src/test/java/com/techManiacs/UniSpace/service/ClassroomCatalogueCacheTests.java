@@ -3,7 +3,9 @@ package com.techManiacs.UniSpace.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techManiacs.UniSpace.config.ClassroomCacheListener;
 import com.techManiacs.UniSpace.model.Classroom;
+import com.techManiacs.UniSpace.repository.BookingRepo;
 import com.techManiacs.UniSpace.repository.ClassroomRepo;
+import com.techManiacs.UniSpace.repository.RoutineRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -22,12 +24,18 @@ class ClassroomCatalogueCacheTests {
     @SuppressWarnings("unchecked")
     private final ValueOperations<String, String> values = mock(ValueOperations.class);
     private final ClassroomRepo repo = mock(ClassroomRepo.class);
+    private final BookingRepo bookingRepo = mock(BookingRepo.class);
+    private final RoutineRepo routineRepo = mock(RoutineRepo.class);
     private final ObjectMapper mapper = new ObjectMapper();
     private final Duration ttl = Duration.ofSeconds(60);
 
     private ClassroomCatalogueCache cache(boolean enabled) {
         when(redis.opsForValue()).thenReturn(values);
         return new ClassroomCatalogueCache(redis, mapper, enabled, ttl);
+    }
+
+    private ClassroomService service(ClassroomCatalogueCache cache) {
+        return new ClassroomService(repo, cache, bookingRepo, routineRepo);
     }
 
     private List<Classroom> rooms() {
@@ -40,7 +48,7 @@ class ClassroomCatalogueCacheTests {
         List<Classroom> expected = rooms();
         ClassroomCatalogueCache cache = cache(true);
         when(values.get(ClassroomCatalogueCache.KEY)).thenReturn(mapper.writeValueAsString(expected));
-        assertThat(new ClassroomService(repo, cache).getAllAvailableClassrooms()).isEqualTo(expected);
+        assertThat(service(cache).getAllAvailableClassrooms()).isEqualTo(expected);
         verifyNoInteractions(repo);
     }
 
@@ -49,7 +57,7 @@ class ClassroomCatalogueCacheTests {
         List<Classroom> expected = rooms();
         ClassroomCatalogueCache cache = cache(true);
         when(repo.findAllByIsAvailable(true)).thenReturn(expected);
-        assertThat(new ClassroomService(repo, cache).getAllAvailableClassrooms()).isEqualTo(expected);
+        assertThat(service(cache).getAllAvailableClassrooms()).isEqualTo(expected);
         verify(values).set(ClassroomCatalogueCache.KEY, mapper.writeValueAsString(expected), ttl);
     }
 
@@ -61,7 +69,7 @@ class ClassroomCatalogueCacheTests {
                 .set(anyString(), anyString(), any(Duration.class));
         List<Classroom> expected = rooms();
         when(repo.findAllByIsAvailable(true)).thenReturn(expected);
-        assertThat(new ClassroomService(repo, cache).getAllAvailableClassrooms()).isEqualTo(expected);
+        assertThat(service(cache).getAllAvailableClassrooms()).isEqualTo(expected);
     }
 
     @Test
@@ -69,7 +77,7 @@ class ClassroomCatalogueCacheTests {
         ClassroomCatalogueCache cache = cache(true);
         when(values.get(anyString())).thenReturn("invalid JSON");
         when(repo.findAllByIsAvailable(true)).thenReturn(rooms());
-        assertThat(new ClassroomService(repo, cache).getAllAvailableClassrooms()).hasSize(1);
+        assertThat(service(cache).getAllAvailableClassrooms()).hasSize(1);
         verify(values).set(eq(ClassroomCatalogueCache.KEY), anyString(), eq(ttl));
     }
 

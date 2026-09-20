@@ -14,6 +14,7 @@ public interface BookingRepo extends JpaRepository<Booking, UUID> {
     List<Booking> findAllByStatus(BookingStatus status);
     List<Booking> findAllByUserId(UUID userId);
     List<Booking> findAllByFacultyEmailIgnoreCase(String facultyEmail);
+    boolean existsByClassroomId(UUID classroomId);
     List<Booking> findAllByClassroomIdAndBookingDateAndStatusIn(
             UUID classroomId, LocalDate bookingDate, List<BookingStatus> statuses);
     List<Booking> findAllByClassroomIdAndBookingDateBetweenAndStatusIn(

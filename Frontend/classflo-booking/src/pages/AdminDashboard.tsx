@@ -1873,7 +1873,9 @@ import {
   Plus,
   Trash2,
   MoreVertical,
-  X
+  X,
+  Building2,
+  Pencil
 } from "lucide-react";
 import { gsap } from "gsap";
 import { apiErrorMessage, apiUrl } from "@/lib/api";
@@ -1921,6 +1923,15 @@ export interface User {
   semester: number | null;
 }
 
+export interface Classroom {
+  id: string;
+  room_number: string;
+  building: string;
+  capacity: number;
+  equipment: string[];
+  is_available: boolean;
+}
+
 // Available roles for the create user form
 const availableRoles = ["STUDENT", "CR", "FACULTY", "ADMIN"];
 
@@ -1955,13 +1966,28 @@ export default function AdminDashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createUserError, setCreateUserError] = useState<string | null>(null);
   const [userPendingDeletion, setUserPendingDeletion] = useState<User | null>(null);
+
+  const [classrooms, setClassrooms] = useState<Classroom[] | null>(null);
+  const [isCreateClassroomModalOpen, setIsCreateClassroomModalOpen] = useState(false);
+  const [newClassroom, setNewClassroom] = useState({
+    room_number: "",
+    building: "",
+    capacity: "",
+    equipment: ""
+  });
+  const [isClassroomSubmitting, setIsClassroomSubmitting] = useState(false);
+  const [createClassroomError, setCreateClassroomError] = useState<string | null>(null);
+  const [classroomBeingEdited, setClassroomBeingEdited] = useState<Classroom | null>(null);
+  const [classroomPendingDeletion, setClassroomPendingDeletion] = useState<Classroom | null>(null);
   
   const [loading, setLoading] = useState(true);
   const [roleLoading, setRoleLoading] = useState(true);
   const [userLoading, setUserLoading] = useState(true);
+  const [classroomLoading, setClassroomLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [roleError, setRoleError] = useState<string | null>(null);
   const [userError, setUserError] = useState<string | null>(null);
+  const [classroomError, setClassroomError] = useState<string | null>(null);
   
   useEffect(() => {
     if (authLoading) {
@@ -1974,6 +2000,7 @@ export default function AdminDashboard() {
     fetchPendingRequests();
     fetchPendingRoleRequests();
     fetchAllUsers();
+    fetchAllClassrooms();
   }, [profile, authLoading, navigate]);
 
   const fetchPendingRequests = async () => {
@@ -2047,6 +2074,21 @@ export default function AdminDashboard() {
       setUserError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setUserLoading(false);
+    }
+  };
+
+  const fetchAllClassrooms = async () => {
+    try {
+      const response = await fetch(apiUrl('/api/classrooms'));
+      if (!response.ok) {
+        throw new Error(await apiErrorMessage(response, 'Failed to fetch classrooms'));
+      }
+      const data: Classroom[] = await response.json();
+      setClassrooms(data);
+    } catch (err) {
+      setClassroomError(err instanceof Error ? err.message : 'Failed to fetch classrooms');
+    } finally {
+      setClassroomLoading(false);
     }
   };
 
@@ -2281,6 +2323,115 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCloseCreateClassroomModal = () => {
+    setIsCreateClassroomModalOpen(false);
+    setClassroomBeingEdited(null);
+    setNewClassroom({
+      room_number: "",
+      building: "",
+      capacity: "",
+      equipment: ""
+    });
+    setCreateClassroomError(null);
+  };
+
+  const handleOpenCreateClassroomModal = () => {
+    setClassroomBeingEdited(null);
+    setNewClassroom({ room_number: "", building: "", capacity: "", equipment: "" });
+    setCreateClassroomError(null);
+    setIsCreateClassroomModalOpen(true);
+  };
+
+  const handleOpenEditClassroomModal = (classroom: Classroom) => {
+    setClassroomBeingEdited(classroom);
+    setNewClassroom({
+      room_number: classroom.room_number,
+      building: classroom.building,
+      capacity: String(classroom.capacity),
+      equipment: classroom.equipment.join(', ')
+    });
+    setCreateClassroomError(null);
+    setIsCreateClassroomModalOpen(true);
+  };
+
+  const handleCreateClassroomSubmit = async () => {
+    const capacity = Number(newClassroom.capacity);
+    if (!newClassroom.room_number.trim() || !newClassroom.building.trim()) {
+      setCreateClassroomError("Room number and building are required");
+      return;
+    }
+    if (!Number.isInteger(capacity) || capacity <= 0) {
+      setCreateClassroomError("Capacity must be a positive whole number");
+      return;
+    }
+
+    setIsClassroomSubmitting(true);
+    setCreateClassroomError(null);
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      const isEditing = classroomBeingEdited !== null;
+      const equipment = newClassroom.equipment
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean);
+      const endpoint = classroomBeingEdited
+        ? `/api/classrooms/${classroomBeingEdited.id}`
+        : '/api/classrooms';
+      const response = await fetch(apiUrl(endpoint), {
+        method: classroomBeingEdited ? 'PATCH' : 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          room_number: newClassroom.room_number,
+          building: newClassroom.building,
+          capacity,
+          equipment
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(await apiErrorMessage(response, 'Failed to create classroom'));
+      }
+
+      await fetchAllClassrooms();
+      handleCloseCreateClassroomModal();
+      toast.success(isEditing
+        ? "Classroom updated successfully"
+        : "Classroom created successfully");
+    } catch (err) {
+      setCreateClassroomError(err instanceof Error ? err.message : 'Failed to save classroom');
+    } finally {
+      setIsClassroomSubmitting(false);
+    }
+  };
+
+  const handleDeleteClassroom = async () => {
+    if (!classroomPendingDeletion) return;
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(apiUrl(`/api/classrooms/${classroomPendingDeletion.id}`), {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(await apiErrorMessage(response, 'Failed to delete classroom'));
+      }
+
+      await fetchAllClassrooms();
+      toast.success(`Room ${classroomPendingDeletion.room_number} was deleted`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete classroom');
+    } finally {
+      setClassroomPendingDeletion(null);
+    }
+  };
+
   const handleDeleteUser = async () => {
     if (!userPendingDeletion) return;
 
@@ -2327,7 +2478,7 @@ export default function AdminDashboard() {
 
 
   // Loading display
-  if (authLoading || loading || roleLoading || userLoading) {
+  if (authLoading || loading || roleLoading || userLoading || classroomLoading) {
     return (
       <div className="min-h-screen gradient-surface">
         <Navbar />
@@ -2347,14 +2498,14 @@ export default function AdminDashboard() {
   }
 
   // Error display
-  if (error || roleError || userError) {
+  if (error || roleError || userError || classroomError) {
     return (
       <div className="min-h-screen gradient-surface">
         <Navbar />
         <div className="pt-32 pb-20 px-4 container mx-auto text-center">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
             <strong className="font-bold">Error: </strong>
-            <span className="block sm:inline">{error || roleError || userError}</span>
+            <span className="block sm:inline">{error || roleError || userError || classroomError}</span>
           </div>
         </div>
       </div>
@@ -2438,6 +2589,7 @@ export default function AdminDashboard() {
             <TabsList className="glass">
               <TabsTrigger value="requests">Pending Booking Requests</TabsTrigger>
               <TabsTrigger value="roles">Role Requests</TabsTrigger>
+              <TabsTrigger value="classrooms">Classrooms</TabsTrigger>
               <TabsTrigger value="users">User Management</TabsTrigger>
               {/* <TabsTrigger value="analytics">Analytics</TabsTrigger> */}
             </TabsList>
@@ -2590,6 +2742,74 @@ export default function AdminDashboard() {
                             >
                               <UserX className="h-4 w-4 mr-1" />
                               Reject
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="classrooms">
+              <Card className="dashboard-card glass shadow-elegant">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Classroom Management
+                  </CardTitle>
+                  <Button
+                    onClick={handleOpenCreateClassroomModal}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Create Classroom
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {!classrooms || classrooms.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No available classrooms found.</p>
+                    </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {classrooms.map(classroom => (
+                        <div
+                          key={classroom.id}
+                          className="p-5 border rounded-lg hover-lift space-y-3"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <h3 className="font-semibold text-lg">Room {classroom.room_number}</h3>
+                              <p className="text-sm text-muted-foreground">{classroom.building}</p>
+                            </div>
+                            <Badge variant="secondary">Capacity {classroom.capacity}</Badge>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {classroom.equipment.length === 0 ? (
+                              <span className="text-sm text-muted-foreground">No equipment listed</span>
+                            ) : classroom.equipment.map(item => (
+                              <Badge key={`${classroom.id}-${item}`} variant="outline">{item}</Badge>
+                            ))}
+                          </div>
+                          <div className="flex justify-end gap-2 pt-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleOpenEditClassroomModal(classroom)}
+                            >
+                              <Pencil className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setClassroomPendingDeletion(classroom)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
                             </Button>
                           </div>
                         </div>
@@ -2876,6 +3096,103 @@ export default function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
+      <Dialog
+        open={isCreateClassroomModalOpen}
+        onOpenChange={(open) => open ? setIsCreateClassroomModalOpen(true) : handleCloseCreateClassroomModal()}
+      >
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              {classroomBeingEdited ? "Edit Classroom" : "Create New Classroom"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            {createClassroomError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {createClassroomError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="classroom-room-number">Room Number *</Label>
+                <Input
+                  id="classroom-room-number"
+                  value={newClassroom.room_number}
+                  onChange={(event) => setNewClassroom(current => ({
+                    ...current,
+                    room_number: event.target.value
+                  }))}
+                  placeholder="e.g., 301"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="classroom-capacity">Capacity *</Label>
+                <Input
+                  id="classroom-capacity"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={newClassroom.capacity}
+                  onChange={(event) => setNewClassroom(current => ({
+                    ...current,
+                    capacity: event.target.value
+                  }))}
+                  placeholder="e.g., 40"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="classroom-building">Building *</Label>
+              <Input
+                id="classroom-building"
+                value={newClassroom.building}
+                onChange={(event) => setNewClassroom(current => ({
+                  ...current,
+                  building: event.target.value
+                }))}
+                placeholder="e.g., Academic Building"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="classroom-equipment">Equipment</Label>
+              <Input
+                id="classroom-equipment"
+                value={newClassroom.equipment}
+                onChange={(event) => setNewClassroom(current => ({
+                  ...current,
+                  equipment: event.target.value
+                }))}
+                placeholder="Projector, Whiteboard, Air conditioning"
+              />
+              <p className="text-xs text-muted-foreground">
+                Separate multiple equipment names with commas.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseCreateClassroomModal}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateClassroomSubmit}
+              disabled={isClassroomSubmitting}
+            >
+              {isClassroomSubmitting
+                ? "Saving..."
+                : classroomBeingEdited
+                ? "Save Changes"
+                : "Create Classroom"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog
         open={userPendingDeletion !== null}
         onOpenChange={(open) => !open && setUserPendingDeletion(null)}
@@ -2896,6 +3213,31 @@ export default function AdminDashboard() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Remove user
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={classroomPendingDeletion !== null}
+        onOpenChange={(open) => !open && setClassroomPendingDeletion(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete classroom?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {classroomPendingDeletion
+                ? `Room ${classroomPendingDeletion.room_number} will be permanently deleted. Classrooms with booking or routine history cannot be deleted.`
+                : "This classroom will be permanently deleted."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep classroom</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteClassroom}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete classroom
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

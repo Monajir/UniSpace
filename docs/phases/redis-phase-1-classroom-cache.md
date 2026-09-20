@@ -16,7 +16,7 @@ Added Redis caching to the available-classroom catalogue. PostgreSQL remains the
 - Redis read, write, eviction, and JSON-decoding errors do not fail catalogue requests. Reads fall back to PostgreSQL. Connection and command timeouts are 500 ms each; fallback can add latency during an outage.
 - Booking validation and pessimistic database locking continue to read PostgreSQL directly. Cached catalogue data is never authoritative for booking conflicts.
 - Direct SQL changes bypass application invalidation. Concurrent cache fills or failed invalidation can briefly leave stale catalogue data; expiration bounds each cached snapshot's lifetime. Strictly current availability is checked against PostgreSQL before booking.
-- There is currently no classroom-administration mutation endpoint; the hooks cover existing repository-based initialization and future repository-based edits without adding one.
+- Administrator classroom creation, update, and deletion use repository operations covered by these invalidation hooks, so successful catalogue changes clear the cached snapshot after commit.
 
 ## Docker and Configuration
 
@@ -71,4 +71,3 @@ TTL checks alone show cache presence, not database-query counts. Cache-hit behav
 - Docker Compose configuration validation passed.
 - Started only the new Redis service; its health check passed and `redis-cli ping` returned `PONG`.
 - Existing frontend/backend/database containers were not rebuilt or restarted during verification. End-to-end caching in the rebuilt Docker backend remains an operational check after the command above.
-

@@ -14,8 +14,11 @@ import java.util.UUID;
 public interface ClassroomRepo extends JpaRepository<Classroom, UUID> {
     List<Classroom> findAllByIsAvailable(Boolean isAvailable);
 
+    @Query("select (count(classroom) > 0) from Classroom classroom "
+            + "where lower(classroom.room_number) = lower(:roomNumber)")
+    boolean existsByRoomNumberIgnoreCase(@Param("roomNumber") String roomNumber);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select classroom from Classroom classroom where classroom.id = :id")
+    @Query("select c from Classroom c where c.id = :id")
     Optional<Classroom> findByIdForUpdate(@Param("id") UUID id);
 }
-

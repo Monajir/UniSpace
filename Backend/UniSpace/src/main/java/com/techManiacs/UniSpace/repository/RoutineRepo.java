@@ -8,6 +8,6 @@ import java.util.UUID;
 
 public interface RoutineRepo extends JpaRepository<Routine, UUID> {
     List<Routine> findAllByClassroomId(UUID classroomId);
+    boolean existsByClassroomId(UUID classroomId);
     List<Routine> findAllByProgramAndSemesterAndSection(String program, Integer semester, Integer section);
 }
-
