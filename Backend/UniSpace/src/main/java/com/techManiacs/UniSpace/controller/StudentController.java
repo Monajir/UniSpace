@@ -4,14 +4,12 @@ import com.techManiacs.UniSpace.model.Booking;
 import com.techManiacs.UniSpace.model.Classroom;
 import com.techManiacs.UniSpace.model.Routine;
 import com.techManiacs.UniSpace.model.User;
-import com.techManiacs.UniSpace.repository.BookingRepo;
 import com.techManiacs.UniSpace.repository.ClassroomRepo;
 import com.techManiacs.UniSpace.repository.RoutineRepo;
 import com.techManiacs.UniSpace.repository.UserRepository;
 import com.techManiacs.UniSpace.service.BookingService;
 import com.techManiacs.UniSpace.utils.BookingResponse;
 import com.techManiacs.UniSpace.utils.RoutineResponse;
-import com.techManiacs.UniSpace.domain.BookingStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +24,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.util.UUID;
-
 
 @RestController
 @RequestMapping("/api/me")
@@ -45,7 +42,7 @@ public class StudentController {
 
     @GetMapping("/bookings")
     public ResponseEntity<?> getMyBookings() {
-        try{
+        try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
             UUID userId = userRepo.findByEmail(email).getId();
@@ -56,7 +53,7 @@ public class StudentController {
 
             LocalDate today = LocalDate.now();
 
-            for(Booking booking : result){
+            for (Booking booking : result) {
 
                 LocalDate bookingDate = booking.getBookingDate();
 
@@ -80,14 +77,14 @@ public class StudentController {
             }
 
             return new ResponseEntity<>(responses, HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/routine")
     public ResponseEntity<?> getMyRoutine() {
-        try{
+        try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
             User user = userRepo.findByEmail(email);
@@ -102,23 +99,25 @@ public class StudentController {
 
             List<RoutineResponse> response = new ArrayList<>();
 
-            for(Map.Entry<String, List<Routine>>entry : routineByDay.entrySet()){
+            for (Map.Entry<String, List<Routine>> entry : routineByDay.entrySet()) {
                 String day = entry.getKey();
                 List<Routine> dayRoutine = entry.getValue();
 
                 RoutineResponse routineResponse = new RoutineResponse();
 
                 routineResponse.setDay(day);
-                List<RoutineResponse.Class> classes = dayRoutine.stream().map(this::convertToClass).collect(Collectors.toList());
+                List<RoutineResponse.Class> classes = dayRoutine.stream().map(this::convertToClass)
+                        .collect(Collectors.toList());
 
                 routineResponse.setClasses(classes);
                 response.add(routineResponse);
             }
             return new ResponseEntity<>(response, HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
     // Helper function
     private RoutineResponse.Class convertToClass(Routine routine) {
         RoutineResponse.Class classObj = new RoutineResponse.Class();
@@ -130,7 +129,8 @@ public class StudentController {
         Classroom classroom = classroomRepo.findById(routine.getClassroomId()).orElse(null);
         assert classroom != null;
         classObj.setRoom(classroom.getRoom_number());
-        classObj.setType("Regular"); // For now only using regular routine, need to add extra bookings to the Map for setting it dynamic
+        classObj.setType("Regular"); // For now only using regular routine, need to add extra bookings to the Map for
+                                     // setting it dynamic
 
         return classObj;
     }
